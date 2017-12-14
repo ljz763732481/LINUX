@@ -1,0 +1,35 @@
+#!/bin/bash
+
+BackDir=/tmp/mysql/`date +%y-%m-%d`
+Backdatabase=mysql
+MYSQLUSR=root
+MYSQLPW=asd196066
+
+if [ $UID -ne 0 ]
+then
+	echo "must use root user"
+	sleep 2
+	exit 0 
+fi
+
+if [ ! -d $BackDir ]
+then
+	mkdir -p $BackDir
+else 
+	echo "the dir is exist"
+fi
+
+/usr/bin/mysqldump -u$MYSQLUSR -p$MYSQLPW -d $Backdatabase >$BackDir/mysql.sql
+
+cd $BackDir && tar -czf mysqlbackup.tar.gz *.sql
+
+find . -type f -name *.sql |xargs rm -rf
+if [ $? -eq 0 ]
+then
+	echo "the database backup success"
+else 
+	echo "error"
+fi
+
+cd /tmp/mysql/ && find . -type d -mtime +30 | xargs rm -rf
+
